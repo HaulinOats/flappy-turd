@@ -7,27 +7,24 @@ window.addEventListener('resize', function(){
         location.reload();
     }, 500)
 });
-console.log(screen.width);
-console.log(screen.height);
-//16:9 aspect ratio
-var ratio = screen.width/screen.height,
-    gameWidth = screen.width,
-    gameHeight = screen.height,
-    orientation = screen.orientation || screen.mozOrientation || screen.msOrientation,
+
+var gameWidth,
+    gameHeight,
     startGame = false;
+
 if (navigator.userAgent.match(/(Mobile|iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
-    console.log('mobile');
-    if (orientation === "landscape-primary" || orientation === "landscape-secondary") {
+    //Mobile
+    if (screen.width > screen.height) {
         alert('Please switch to Portrait orientation!');
     } else {
+        gameWidth  = 500;
+        gameHeight = 600;
         startGame = true;
     }
 } else {
-    console.log('desktop');
-    if (screen.width > screen.height || screen.width > 500) {
-        gameWidth  = 500;
-        gameHeight = 600;
-    }
+    //Desktop
+    gameWidth  = 500;
+    gameHeight = 600;
     startGame = true;
 }
 
@@ -41,7 +38,7 @@ if (startGame) {
 
             // Load the bird sprite
             game.load.image('background', 'assets/bg.png');
-            game.load.image('bird', 'assets/turd.png');
+            game.load.image('turd', 'assets/turd.png');
             game.load.image('pipe', 'assets/toilet.png');
             game.load.image('wing', 'assets/wing.png');
             game.load.image('plunger', 'assets/plunger.png');
@@ -56,6 +53,12 @@ if (startGame) {
             //set global game variables
             this.isMouseDown = false;
             this.isGameOver  = false;
+            this.gameRatio   = gameWidth/gameHeight;
+            this.widthRatio  = gameWidth/100;
+            this.heightRatio = gameHeight/100;
+            console.log("game ratio: " + this.gameRatio);
+            console.log("width ratio: " + this.widthRatio);
+            console.log("height ratio: " + this.heightRatio);
 
             // This function is called after the preload function     
             // Here we set up the game, display sprites, etc.
@@ -71,7 +74,8 @@ if (startGame) {
             game.physics.startSystem(Phaser.Physics.ARCADE);
 
             // Display the bird at the position x=100 and y=245
-            this.turd = game.add.sprite(100, 245, 'bird');
+            this.turd = game.add.sprite(100, 245, 'turd');
+            this.turd.scale.setTo(1, 1);
             this.wing = this.turd.addChild(game.make.sprite(40,0, 'wing'));
             this.jumpSound = [game.add.audio('jump'), game.add.audio('jump2'), game.add.audio('jump3'), game.add.audio('jump4')];
             this.toiletSound = game.add.audio('toilet');
@@ -109,7 +113,7 @@ if (startGame) {
                 this.addRowOfPipes, this);
 
             //occasionally shows 'plunger' powerup
-            this.plungerTimer = game.time.events.loop(13000,
+            this.plungerTimer = game.time.events.loop(11000,
                 this.showPlunger, this);
 
             // Add gravity to the bird to make it fall
@@ -247,7 +251,7 @@ if (startGame) {
             if (this.score > this.highScore)
                 localStorage.setItem('highScore', this.score);
 
-            labelScore = game.add.text(200, 250, "Your Score: " + this.score, 
+            labelScore = game.add.text(200, 250, "Your Score: " + (this.score < 0 ? "0" : this.score), 
                 { font: "25px Helvetica", fill: "#ffffff" });
             labelScore1 = game.add.text(200, 290, "High Score: " + localStorage.getItem('highScore'), 
                 { font: "25px Helvetica", fill: "#ffffff" });
